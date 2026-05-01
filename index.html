@@ -5,174 +5,152 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Онлайн-табло ✈ Аэропорт Юрьевский (UVS) | Саратов</title>
     <style>
+        :root { --bg: #0a1628; --panel: #111d33; --blue: #3b82f6; --light: #60a5fa; --text: #e2e8f0; --gray: #94a3b8; --border: #1e3a5f; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0a1628; color: #e2e8f0; min-height: 100vh;
-        }
-        .header {
-            background: #111d33; padding: 20px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px solid #1e3a5f;
-        }
-        .code { font-size: 2.5rem; font-weight: 800; color: #3b82f6; letter-spacing: 2px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a1628; color: #e2e8f0; min-height: 100vh; }
+        .header { background: #111d33; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e3a5f; flex-wrap: wrap; gap: 20px; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .code { font-size: 2.5rem; font-weight: 800; color: #3b82f6; }
         .name { font-size: 1.4rem; font-weight: 600; }
         .city { font-size: 0.9rem; color: #94a3b8; }
         .clock { font-size: 1.8rem; font-weight: 700; color: #60a5fa; font-family: 'Courier New', monospace; }
         .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
-        table {
-            width: 100%; background: #111d33; border-radius: 12px;
-            border: 1px solid #1e3a5f; border-collapse: collapse;
-        }
-        th {
-            background: rgba(30,58,95,0.6); padding: 16px; text-align: left;
-            color: #94a3b8; font-size: 0.85rem; text-transform: uppercase;
-        }
+        .title { font-size: 1.5rem; color: #60a5fa; margin-bottom: 20px; }
+        table { width: 100%; background: #111d33; border-radius: 12px; border: 1px solid #1e3a5f; border-collapse: collapse; }
+        th { background: rgba(30,58,95,0.6); padding: 16px; text-align: left; color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; border-bottom: 2px solid #1e3a5f; }
         td { padding: 18px 16px; border-bottom: 1px solid #1e3a5f; }
         tr:hover { background: rgba(59,130,246,0.08); }
-        .badge {
-            display: inline-block; padding: 6px 14px; border-radius: 20px;
-            font-size: 0.85rem; font-weight: 600;
-        }
-        .status-scheduled { background: rgba(59,130,246,0.15); color: #60a5fa; }
-        .status-check-in { background: rgba(59,130,246,0.25); color: #93c5fd; animation: pulse 2s infinite; }
-        .status-boarding { background: rgba(245,158,11,0.2); color: #fbbf24; animation: pulse 1s infinite; }
-        .status-departed { background: rgba(16,185,129,0.15); color: #34d399; }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 5px rgba(59,130,246,0.3); }
-            50% { box-shadow: 0 0 20px rgba(59,130,246,0.6); }
-        }
-        .admin-link {
-            position: fixed; bottom: 20px; right: 20px;
-            background: #111d33; color: #60a5fa; padding: 10px 20px;
-            border-radius: 20px; text-decoration: none; border: 1px solid #3b82f6;
-        }
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .scheduled { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .check-in { background: rgba(59,130,246,0.25); color: #93c5fd; animation: pulse 2s infinite; }
+        .boarding { background: rgba(245,158,11,0.2); color: #fbbf24; animation: pulse 1s infinite; }
+        .departed { background: rgba(16,185,129,0.15); color: #34d399; }
+        .closed { background: rgba(239,68,68,0.15); color: #f87171; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 5px rgba(59,130,246,0.3);} 50%{box-shadow:0 0 20px rgba(59,130,246,0.6);} }
+        .admin-link { position: fixed; bottom: 20px; right: 20px; background: #111d33; color: #60a5fa; padding: 10px 20px; border-radius: 20px; text-decoration: none; border: 1px solid #3b82f6; font-weight: 600; }
+        @media (max-width: 768px) { .header { padding: 16px; } .code { font-size: 1.8rem; } thead { display: none; } td { display: block; text-align: right; padding: 12px; } td::before { content: attr(data-label); float: left; color: #94a3b8; font-weight: 600; } tr { border-bottom: 2px solid #1e3a5f; } }
     </style>
 </head>
 <body>
-
     <header class="header">
-        <div>
-            <span class="code">UVS</span>
-            <div class="name">Аэропорт Юрьевский</div>
-            <div class="city">Саратов • Международный</div>
+        <div class="header-left">
+            <div class="code">UVS</div>
+            <div><div class="name">Аэропорт Юрьевский</div><div class="city">Саратов • Международный</div></div>
         </div>
         <div class="clock" id="clock">--:--</div>
     </header>
 
     <div class="container">
-        <h2 style="color:#60a5fa;margin-bottom:20px;">Вылет • Departures</h2>
+        <div class="title">Вылет • Departures</div>
         <table>
-            <thead>
-                <tr><th>Время</th><th>Рейс</th><th>Направление</th><th>Статус</th></tr>
-            </thead>
-            <tbody id="board"></tbody>
+            <thead><tr><th>Время</th><th>Рейс</th><th>Направление</th><th>Статус</th></tr></thead>
+            <tbody id="board"><tr><td colspan="4" style="text-align:center;padding:40px;">Загрузка...</td></tr></tbody>
         </table>
     </div>
 
     <a href="/admin.html" class="admin-link">🔧 Управление</a>
 
     <script>
-        // ⚠️ ЗАМЕНИ НА СВОЮ ССЫЛКУ
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj_l4k-Qc_nhRJ2z4PKr_kvSV_giJ5pZr7dO0CC7X4tFhEX-AJ6wXiw2akrQqQ8qAJNuqAgSreCepm/pub?output=csv';
+        // ⚠️ ЗАМЕНИ НА СВОЮ ССЫЛКУ ОПУБЛИКОВАННОЙ ТАБЛИЦЫ (CSV)
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj_l4k-Qc_nhRJ2z4PKr_kvSV_giJ5pZr7dO0CC7X4tFhEX-AJ6wXiw2akrQqQ8qAJNuqAgSreCepm/pub?output=csv';
 
         let flights = [];
 
         async function load() {
             try {
-                const r = await fetch(SHEET_URL);
+                const r = await fetch(CSV_URL);
                 const text = await r.text();
                 const rows = text.trim().split('\n').slice(1);
-                
-                flights = rows.map(row => {
-                    const cols = row.split(',');
+                flights = rows.filter(r => r.trim()).map(row => {
+                    const cols = parseCSV(row);
                     return {
-                        id: cols[0],
-                        airline: cols[1],
-                        flightNumber: cols[2],
-                        destination: cols[3],
-                        iata: cols[4],
-                        checkInStart: cols[5],
-                        checkInEnd: cols[6],
-                        boardingStart: cols[7],
-                        boardingEnd: cols[8],
-                        departureTime: cols[9],
-                        date: cols[10],
-                        checkInDesks: cols[11],
-                        gate: cols[12]
+                        id: cols[0], airline: cols[1], flightNumber: cols[2],
+                        destination: cols[3], iata: cols[4],
+                        checkInStart: cols[5], checkInEnd: cols[6],
+                        boardingStart: cols[7], boardingEnd: cols[8],
+                        departureTime: cols[9], date: cols[10],
+                        checkInDesks: cols[11], gate: cols[12]
                     };
                 });
-
                 updateStatuses();
                 render();
             } catch(e) {
-                document.getElementById('board').innerHTML = '<tr><td colspan="4" style="padding:40px;text-align:center;">Ошибка загрузки</td></tr>';
+                console.error(e);
+                document.getElementById('board').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;">Ошибка загрузки</td></tr>';
             }
+        }
+
+        function parseCSV(row) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let c of row) {
+                if (c === '"') { inQuotes = !inQuotes; continue; }
+                if (c === ',' && !inQuotes) { result.push(current.trim()); current = ''; continue; }
+                current += c;
+            }
+            result.push(current.trim());
+            return result;
         }
 
         function getTime() {
             const now = new Date();
-            let h = now.getUTCHours() + 4;
-            return { hours: h, minutes: now.getUTCMinutes(), total: h * 60 + now.getUTCMinutes() };
+            let h = now.getUTCHours() + 4, d = now.getUTCDate(), m = now.getUTCMonth(), y = now.getUTCFullYear();
+            if (h >= 24) { h -= 24; d++; }
+            return { hours: h, minutes: now.getUTCMinutes(), total: h*60+now.getUTCMinutes(), date: d, month: m, year: y };
         }
 
         function getToday() {
-            const now = new Date();
-            let d = now.getUTCDate(), m = now.getUTCMonth(), y = now.getUTCFullYear();
-            if (now.getUTCHours() + 4 >= 24) d++;
-            return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const t = getTime();
+            return `${t.year}-${String(t.month+1).padStart(2,'0')}-${String(t.date).padStart(2,'0')}`;
         }
+
+        function toMin(t) { if(!t) return 0; const[p,m]=t.split(':').map(Number); return p*60+m; }
 
         function updateStatuses() {
             const t = getTime();
             const today = getToday();
 
             flights.forEach(f => {
-                if (f.date !== today) {
+                if (!f.date || f.date !== today) {
                     f.status = f.date < today ? 'departed' : 'scheduled';
                     f.text = f.date < today ? 'Вылетел' : 'По расписанию';
                     return;
                 }
-                const cis = toMin(f.checkInStart), cie = toMin(f.checkInEnd);
-                const bs = toMin(f.boardingStart), be = toMin(f.boardingEnd);
-                const dep = toMin(f.departureTime);
-                
-                if (t.total < cis) { f.status = 'scheduled'; f.text = 'По расписанию'; }
-                else if (t.total < cie) { f.status = 'check-in'; f.text = 'Регистрация'; }
-                else if (t.total < bs) { f.status = 'check-in-closed'; f.text = 'Рег. окончена'; }
-                else if (t.total < be) { f.status = 'boarding'; f.text = 'Посадка'; }
-                else if (t.total < dep) { f.status = 'boarding-closed'; f.text = 'Пос. окончена'; }
-                else { f.status = 'departed'; f.text = 'Вылетел'; }
+                const cis=toMin(f.checkInStart), cie=toMin(f.checkInEnd), bs=toMin(f.boardingStart), be=toMin(f.boardingEnd), dep=toMin(f.departureTime);
+                if (t.total < cis) { f.status='scheduled'; f.text='По расписанию'; }
+                else if (t.total < cie) { f.status='check-in'; f.text='Регистрация'; }
+                else if (t.total < bs) { f.status='closed'; f.text='Регистрация закончена'; }
+                else if (t.total < be) { f.status='boarding'; f.text='Посадка'; }
+                else if (t.total < dep) { f.status='closed'; f.text='Посадка закончена'; }
+                else { f.status='departed'; f.text='Вылетел'; }
             });
         }
 
-        function toMin(t) { if(!t) return 0; const [h,m] = t.split(':').map(Number); return h*60+m; }
-
         function render() {
             const today = getToday();
-            const visible = flights.filter(f => f.date >= today).sort((a,b) => a.date.localeCompare(b.date) || a.departureTime.localeCompare(b.departureTime));
-            
-            if (!visible.length) {
-                document.getElementById('board').innerHTML = '<tr><td colspan="4" style="padding:40px;text-align:center;">Нет рейсов</td></tr>';
-                return;
-            }
-
-            document.getElementById('board').innerHTML = visible.map(f => `
+            const visible = flights.filter(f => f.date >= today).sort((a,b) => (a.date+a.departureTime).localeCompare(b.date+b.departureTime));
+            const tbody = document.getElementById('board');
+            if (!visible.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;">Нет рейсов</td></tr>'; return; }
+            tbody.innerHTML = visible.map(f => `
                 <tr>
-                    <td><strong>${f.departureTime}</strong></td>
-                    <td><span style="color:#60a5fa;">${f.airline}</span><br><strong>${f.flightNumber}</strong></td>
-                    <td>${f.destination} <span style="color:#60a5fa;">${f.iata}</span></td>
-                    <td><span class="badge status-${f.status}">${f.text}</span></td>
+                    <td data-label="Время"><strong>${f.departureTime||'—'}</strong></td>
+                    <td data-label="Рейс"><span style="color:#60a5fa;">${esc(f.airline)}</span><br><strong>${esc(f.flightNumber)}</strong></td>
+                    <td data-label="Направление">${esc(f.destination)} <span style="color:#60a5fa;">${esc(f.iata)}</span></td>
+                    <td data-label="Статус"><span class="badge ${f.status}">${f.text}</span>
+                        ${f.checkInDesks&&f.status==='check-in'?`<div style="font-size:0.75rem;color:#94a3b8;">Стойки: ${esc(f.checkInDesks)}</div>`:''}
+                        ${f.gate&&f.status==='boarding'?`<div style="font-size:0.75rem;color:#94a3b8;">Выход: ${esc(f.gate)}</div>`:''}
+                    </td>
                 </tr>
             `).join('');
         }
 
-        setInterval(() => {
-            const t = getTime();
-            document.getElementById('clock').textContent = 
-                `${String(t.hours).padStart(2,'0')}:${String(t.minutes).padStart(2,'0')} (UTC+4)`;
-        }, 1000);
+        function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
 
+        setInterval(()=>{
+            const t=getTime();
+            document.getElementById('clock').textContent=`${String(t.hours).padStart(2,'0')}:${String(t.minutes).padStart(2,'0')} (UTC+4)`;
+        },1000);
         load();
         setInterval(load, 10000);
     </script>
