@@ -1,85 +1,67 @@
 const https = require('https');
-const http = require('http');
 
-// ⚠️ ЗАМЕНИ НА СВОЙ URL ОТ NPOINT.IO
-const STORAGE_URL = 'https://api.npoint.io/9b5014136177cbfc5469';
+// ⚠️ СЮДА ВСТАВЬ СВОЙ URL ОТ NPOINT.IO
+const STORAGE_URL = 'https://api.npoint.io/8450771b7ce94b0daf1f';
 
-function makeRequest(url, options = {}) {
+function request(method, body) {
     return new Promise((resolve, reject) => {
-        const urlObj = new URL(url);
-        const mod = urlObj.protocol === 'https:' ? https : http;
+        const url = new URL(STORAGE_URL);
         
-        const reqOptions = {
-            hostname: urlObj.hostname,
-            path: urlObj.pathname,
-            method: options.method || 'GET',
+        const options = {
+            hostname: url.hostname,
+            path: url.pathname,
+            method: method,
             headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
+                'Content-Type': 'application/json'
             }
         };
 
-        const req = mod.request(reqOptions, (res) => {
+        const req = https.request(options, (res) => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
                 try {
                     resolve(JSON.parse(data));
                 } catch(e) {
-                    resolve(data);
+                    reject(new Error('Parse error: ' + data.substring(0, 100)));
                 }
             });
         });
 
-        req.on('error', reject);
+        req.on('error', (err) => {
+            reject(new Error('Request error: ' + err.message));
+        });
 
-        if (options.body) {
-            req.write(JSON.stringify(options.body));
+        if (body) {
+            req.write(JSON.stringify(body));
         }
         req.end();
     });
 }
 
-async function readFlights() {
-    try {
-        const data = await makeRequest(STORAGE_URL);
-        return data?.flights || [];
-    } catch(e) {
-        console.error('Read error:', e.message);
-        return [];
-    }
-}
-
-async function saveFlights(flights) {
-    try {
-        await makeRequest(STORAGE_URL, {
-            method: 'PUT',
-            body: { flights }
-        });
-        return true;
-    } catch(e) {
-        console.error('Save error:', e.message);
-        return false;
-    }
-}
-
 module.exports = async (req, res) => {
+    // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
     try {
-        // GET
+        // GET — получить рейсы
         if (req.method === 'GET') {
-            const flights = await readFlights();
-            return res.status(200).json({ flights });
+            const data = await request('GET');
+            return res.status(200).json({ flights: data.flights || [] });
         }
 
-        // POST
+        // POST — добавить рейс
         if (req.method === 'POST') {
-            const flights = await readFlights();
+            // Сначала читаем текущие данные
+            const data = await request('GET');
+            const flights = data.flights || [];
+            
             const flight = req.body;
             
             if (!flight.flightNumber || !flight.destination) {
@@ -90,42 +72,56 @@ module.exports = async (req, res) => {
             flight.createdAt = new Date().toISOString();
             
             flights.push(flight);
-            await saveFlights(flights);
             
-            return res.status(200).json({ success: true, flight });
+            // Сохраняем
+            await request('PUT', { flights });
+            
+            return res.status(200).json({ success: true, flight: flight });
         }
 
-        // PUT
+        // PUT — обновить рейс
         if (req.method === 'PUT') {
-            const flights = await readFlights();
+            const data = await request('GET');
+            const flights = data.flights || [];
+            
             const updated = req.body;
             const index = flights.findIndex(f => f.id === updated.id);
             
-            if (index === -1) return res.status(404).json({ error: 'Рейс не найден' });
+            if (index === -1) {
+                return res.status(404).json({ error: 'Рейс не найден' });
+            }
             
             flights[index] = { ...flights[index], ...updated };
-            await saveFlights(flights);
+            await request('PUT', { flights });
             
             return res.status(200).json({ success: true, flight: flights[index] });
         }
 
-        // DELETE
+        // DELETE — удалить рейс
         if (req.method === 'DELETE') {
-            const flights = await readFlights();
+            const data = await request('GET');
+            const flights = data.flights || [];
+            
             const id = req.query.id;
             const index = flights.findIndex(f => f.id === id);
             
-            if (index === -1) return res.status(404).json({ error: 'Рейс не найден' });
+            if (index === -1) {
+                return res.status(404).json({ error: 'Рейс не найден' });
+            }
             
             flights.splice(index, 1);
-            await saveFlights(flights);
+            await request('PUT', { flights });
             
             return res.status(200).json({ success: true });
         }
 
         return res.status(405).json({ error: 'Метод не поддерживается' });
 
-    } catch(err) {
-        return res.status(500).json({ error: err.message });
+    } catch (err) {
+        console.error('Error:', err.message);
+        return res.status(500).json({ 
+            error: 'Ошибка сервера', 
+            message: err.message 
+        });
     }
 };
