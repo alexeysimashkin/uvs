@@ -3,24 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление рейсами ✈ Аэропорт Юрьевский (UVS) | Саратов</title>
+    <title>Управление ✈ Юрьевский (UVS) | Саратов</title>
     <style>
-        :root {
-            --bg-dark: #0a1628; --bg-panel: #111d33; --accent: #3b82f6;
-            --accent-light: #60a5fa; --text-primary: #e2e8f0;
-            --text-secondary: #94a3b8; --border: #1e3a5f;
-        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', sans-serif;
             background: #0a1628; color: #e2e8f0; min-height: 100vh;
             padding: 40px;
-        }
-        .storage-badge {
-            position: fixed; top: 20px; right: 20px;
-            background: rgba(16,185,129,0.2); border: 1px solid #34d399;
-            color: #34d399; padding: 8px 16px; border-radius: 20px;
-            font-weight: 600; font-size: 0.85rem; z-index: 99;
         }
         h1 { color: #60a5fa; margin-bottom: 10px; }
         .nav { margin-bottom: 30px; }
@@ -35,14 +24,11 @@
         label { font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; font-weight: 600; }
         input {
             background: #0a1628; border: 1px solid #1e3a5f; color: #e2e8f0;
-            padding: 10px 14px; border-radius: 8px; font-size: 0.95rem;
+            padding: 10px; border-radius: 8px; font-size: 0.95rem;
         }
         input:focus { outline: none; border-color: #3b82f6; }
-        .btn {
-            padding: 12px 24px; border: none; border-radius: 8px;
-            font-weight: 600; cursor: pointer; font-size: 0.9rem;
-        }
-        .btn-save { background: #3b82f6; color: white; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-save { background: #3b82f6; color: white; font-size: 1rem; }
         .btn-save:hover { background: #2563eb; }
         .btn-cancel { background: transparent; border: 1px solid #1e3a5f; color: #94a3b8; margin-left: 10px; }
         .flight-item {
@@ -51,40 +37,38 @@
             margin-bottom: 10px; flex-wrap: wrap; gap: 12px;
         }
         .flight-info { display: flex; gap: 20px; flex-wrap: wrap; }
-        .flight-detail { font-size: 0.9rem; color: #94a3b8; }
-        .flight-detail strong { color: #e2e8f0; }
-        .btn-edit {
-            background: transparent; border: 1px solid #3b82f6;
-            color: #3b82f6; padding: 6px 12px; border-radius: 6px;
-            cursor: pointer; margin-right: 6px; font-size: 0.8rem;
-        }
         .btn-del {
             background: transparent; border: 1px solid #ef4444;
-            color: #ef4444; padding: 6px 12px; border-radius: 6px;
-            cursor: pointer; font-size: 0.8rem;
+            color: #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer;
         }
-        .notification {
+        .btn-edit {
+            background: transparent; border: 1px solid #3b82f6;
+            color: #3b82f6; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-right: 6px;
+        }
+        .msg {
             position: fixed; bottom: 30px; right: 30px;
             padding: 14px 24px; border-radius: 10px; font-weight: 600;
-            color: white; z-index: 9999;
-            animation: fade 3s forwards;
+            color: white; z-index: 9999; animation: fade 3s forwards;
         }
-        .notification.success { background: #10b981; }
-        .notification.error { background: #ef4444; }
+        .msg.success { background: #10b981; }
+        .msg.error { background: #ef4444; }
         @keyframes fade {
             0% { opacity: 0; transform: translateY(20px); }
             10% { opacity: 1; transform: translateY(0); }
             80% { opacity: 1; }
-            100% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 0; }
+        }
+        .copy-btn {
+            background: #10b981; color: white; padding: 8px 16px;
+            border-radius: 8px; border: none; cursor: pointer; font-weight: 600;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div class="storage-badge">💾 Данные хранятся вечно</div>
-
     <h1>🔧 Управление рейсами | Юрьевский (UVS)</h1>
-    <div class="nav"><a href="/">← Вернуться на табло</a></div>
+    <div class="nav"><a href="/">← На табло</a></div>
 
     <div class="card">
         <h2 id="formTitle">➕ Добавить рейс</h2>
@@ -115,35 +99,37 @@
 
     <div class="card">
         <h2>📋 Все рейсы</h2>
-        <div id="flightsList">Загрузка...</div>
+        <button class="copy-btn" onclick="copyToTablo()">📋 Скопировать данные для табло</button>
+        <div id="flightsList" style="margin-top:20px;">Загрузка...</div>
     </div>
 
     <script>
-        const API = '/api/flights';
-        let flights = [];
+        const STORAGE_KEY = 'uvs_flights';
+
+        function getFlights() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function saveFlights(flights) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(flights));
+        }
 
         function getDateString() {
             const now = new Date();
             let h = now.getUTCHours() + 4, d = now.getUTCDate(), m = now.getUTCMonth(), y = now.getUTCFullYear();
-            if (h >= 24) { h -= 24; d++; }
+            if (h >= 24) { d++; }
             return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         }
 
-        async function load() {
-            try {
-                const r = await fetch(API);
-                const d = await r.json();
-                flights = d.flights || [];
-                render();
-            } catch(e) {
-                document.getElementById('flightsList').innerHTML = '<p style="color:#ef4444;">❌ Ошибка</p>';
-            }
-        }
-
-        async function saveFlight(e) {
+        function saveFlight(e) {
             e.preventDefault();
             const editId = document.getElementById('editId').value;
             const flight = {
+                id: editId || Date.now().toString(),
                 airline: document.getElementById('airline').value.trim(),
                 flightNumber: document.getElementById('flightNumber').value.trim(),
                 destination: document.getElementById('destination').value.trim(),
@@ -157,29 +143,37 @@
                 checkInDesks: document.getElementById('checkInDesks').value.trim(),
                 gate: document.getElementById('gate').value.trim(),
             };
-            if (editId) flight.id = editId;
 
-            const r = await fetch(API, {
-                method: editId ? 'PUT' : 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify(flight)
-            });
-            const d = await r.json();
-            if (d.success) {
-                notify('✅ Сохранено!', 'success');
-                cancelEdit();
-                load();
+            let flights = getFlights();
+            
+            if (editId) {
+                const idx = flights.findIndex(f => f.id === editId);
+                if (idx !== -1) flights[idx] = flight;
             } else {
-                notify('❌ Ошибка', 'error');
+                flights.push(flight);
             }
+
+            saveFlights(flights);
+            showMsg('✅ Сохранено!');
+            cancelEdit();
+            render();
         }
 
         function editFlight(f) {
-            Object.keys(f).forEach(k => {
-                const el = document.getElementById(k);
-                if (el && k !== 'id') el.value = f[k] || '';
-            });
-            document.getElementById('editId').value = f.id || '';
+            document.getElementById('editId').value = f.id;
+            document.getElementById('airline').value = f.airline || '';
+            document.getElementById('flightNumber').value = f.flightNumber || '';
+            document.getElementById('destination').value = f.destination || '';
+            document.getElementById('iata').value = f.iata || '';
+            document.getElementById('checkInStart').value = f.checkInStart || '';
+            document.getElementById('checkInEnd').value = f.checkInEnd || '';
+            document.getElementById('boardingStart').value = f.boardingStart || '';
+            document.getElementById('boardingEnd').value = f.boardingEnd || '';
+            document.getElementById('departureTime').value = f.departureTime || '';
+            document.getElementById('flightDate').value = f.date || '';
+            document.getElementById('checkInDesks').value = f.checkInDesks || '';
+            document.getElementById('gate').value = f.gate || '';
+            
             document.getElementById('formTitle').textContent = '✏️ Редактировать';
             document.getElementById('submitBtn').textContent = '💾 Сохранить';
             document.getElementById('cancelBtn').style.display = 'inline-block';
@@ -194,14 +188,17 @@
             document.getElementById('flightDate').value = getDateString();
         }
 
-        async function del(id) {
+        function del(id) {
             if (!confirm('Удалить рейс?')) return;
-            await fetch(`${API}?id=${id}`, { method: 'DELETE' });
-            notify('🗑 Удалено', 'success');
-            load();
+            let flights = getFlights();
+            flights = flights.filter(f => f.id !== id);
+            saveFlights(flights);
+            showMsg('🗑 Удалено');
+            render();
         }
 
         function render() {
+            const flights = getFlights();
             if (!flights.length) {
                 document.getElementById('flightsList').innerHTML = '<p style="color:#94a3b8;">Нет рейсов</p>';
                 return;
@@ -211,10 +208,10 @@
                 .map(f => `
                     <div class="flight-item">
                         <div class="flight-info">
-                            <span class="flight-detail">📅 <strong>${f.date}</strong></span>
-                            <span class="flight-detail">🕐 <strong>${f.departureTime}</strong></span>
-                            <span class="flight-detail">✈ <strong>${f.airline} ${f.flightNumber}</strong></span>
-                            <span class="flight-detail">📍 ${f.destination} (${f.iata})</span>
+                            <span>📅 <strong>${f.date}</strong></span>
+                            <span>🕐 <strong>${f.departureTime}</strong></span>
+                            <span>✈ <strong>${f.airline} ${f.flightNumber}</strong></span>
+                            <span>📍 ${f.destination} (${f.iata})</span>
                         </div>
                         <div>
                             <button class="btn-edit" onclick="editFlight(${JSON.stringify(f).replace(/"/g,'&quot;')})">✏️</button>
@@ -224,17 +221,27 @@
                 `).join('');
         }
 
-        function notify(msg, type) {
+        function copyToTablo() {
+            const flights = getFlights();
+            const json = JSON.stringify(flights);
+            navigator.clipboard.writeText(json).then(() => {
+                showMsg('📋 Данные скопированы! Вставь их в табло.');
+            });
+            
+            // Показать инструкцию
+            alert('Данные скопированы!\n\n1. Открой index.html (табло)\n2. Нажми F12 → Console\n3. Вставь данные и нажми Enter\n\nКоманда:\nlocalStorage.setItem("uvs_flights", \'' + json + '\');\nlocation.reload();');
+        }
+
+        function showMsg(msg) {
             const n = document.createElement('div');
-            n.className = `notification ${type}`;
+            n.className = 'msg success';
             n.textContent = msg;
             document.body.appendChild(n);
             setTimeout(() => n.remove(), 3000);
         }
 
         document.getElementById('flightDate').value = getDateString();
-        load();
-        setInterval(load, 15000);
+        render();
     </script>
 </body>
 </html>
