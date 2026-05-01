@@ -6,63 +6,27 @@
     <title>Управление ✈ Юрьевский (UVS) | Саратов</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #0a1628; color: #e2e8f0; min-height: 100vh;
-            padding: 40px;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #0a1628; color: #e2e8f0; min-height: 100vh; padding: 40px; }
         h1 { color: #60a5fa; margin-bottom: 10px; }
         .nav { margin-bottom: 30px; }
-        .nav a { color: #60a5fa; text-decoration: none; font-weight: 600; }
-        .card {
-            background: #111d33; border: 1px solid #1e3a5f;
-            border-radius: 12px; padding: 30px; margin-bottom: 30px;
-        }
+        .nav a { color: #60a5fa; text-decoration: none; }
+        .card { background: #111d33; border: 1px solid #1e3a5f; border-radius: 12px; padding: 30px; margin-bottom: 30px; }
         h2 { color: #60a5fa; margin-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
         .field { display: flex; flex-direction: column; gap: 6px; }
-        label { font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; font-weight: 600; }
-        input {
-            background: #0a1628; border: 1px solid #1e3a5f; color: #e2e8f0;
-            padding: 10px; border-radius: 8px; font-size: 0.95rem;
-        }
+        label { font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; }
+        input { background: #0a1628; border: 1px solid #1e3a5f; color: #e2e8f0; padding: 10px; border-radius: 8px; }
         input:focus { outline: none; border-color: #3b82f6; }
         .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .btn-save { background: #3b82f6; color: white; font-size: 1rem; }
-        .btn-save:hover { background: #2563eb; }
+        .btn-save { background: #3b82f6; color: white; }
         .btn-cancel { background: transparent; border: 1px solid #1e3a5f; color: #94a3b8; margin-left: 10px; }
-        .flight-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 14px; background: #0a1628; border-radius: 8px;
-            margin-bottom: 10px; flex-wrap: wrap; gap: 12px;
-        }
-        .flight-info { display: flex; gap: 20px; flex-wrap: wrap; }
-        .btn-del {
-            background: transparent; border: 1px solid #ef4444;
-            color: #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer;
-        }
-        .btn-edit {
-            background: transparent; border: 1px solid #3b82f6;
-            color: #3b82f6; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-right: 6px;
-        }
-        .msg {
-            position: fixed; bottom: 30px; right: 30px;
-            padding: 14px 24px; border-radius: 10px; font-weight: 600;
-            color: white; z-index: 9999; animation: fade 3s forwards;
-        }
-        .msg.success { background: #10b981; }
-        .msg.error { background: #ef4444; }
-        @keyframes fade {
-            0% { opacity: 0; transform: translateY(20px); }
-            10% { opacity: 1; transform: translateY(0); }
-            80% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        .copy-btn {
-            background: #10b981; color: white; padding: 8px 16px;
-            border-radius: 8px; border: none; cursor: pointer; font-weight: 600;
-            margin-top: 10px;
-        }
+        .flight-item { display: flex; justify-content: space-between; padding: 14px; background: #0a1628; border-radius: 8px; margin-bottom: 10px; flex-wrap: wrap; gap: 12px; }
+        .btn-edit { background: transparent; border: 1px solid #3b82f6; color: #3b82f6; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-right: 6px; }
+        .btn-del { background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .msg { position: fixed; bottom: 30px; right: 30px; padding: 14px 24px; border-radius: 10px; color: white; font-weight: 600; animation: fade 3s forwards; }
+        .success { background: #10b981; }
+        .error { background: #ef4444; }
+        @keyframes fade { 0%{opacity:0;transform:translateY(20px);} 10%{opacity:1;} 80%{opacity:1;} 100%{opacity:0;} }
     </style>
 </head>
 <body>
@@ -75,10 +39,10 @@
         <form onsubmit="saveFlight(event)">
             <input type="hidden" id="editId">
             <div class="grid">
-                <div class="field"><label>Авиакомпания</label><input type="text" id="airline" required></div>
-                <div class="field"><label>Номер рейса</label><input type="text" id="flightNumber" required></div>
-                <div class="field"><label>Город</label><input type="text" id="destination" required></div>
-                <div class="field"><label>IATA</label><input type="text" id="iata" maxlength="3" required></div>
+                <div class="field"><label>Авиакомпания</label><input id="airline" required></div>
+                <div class="field"><label>Номер рейса</label><input id="flightNumber" required></div>
+                <div class="field"><label>Город</label><input id="destination" required></div>
+                <div class="field"><label>IATA</label><input id="iata" maxlength="3" required></div>
             </div>
             <div class="grid">
                 <div class="field"><label>Регистрация с</label><input type="time" id="checkInStart" required></div>
@@ -88,8 +52,8 @@
                 <div class="field"><label>Вылет ✈</label><input type="time" id="departureTime" required></div>
             </div>
             <div class="grid">
-                <div class="field"><label>Стойки</label><input type="text" id="checkInDesks"></div>
-                <div class="field"><label>Выход</label><input type="text" id="gate"></div>
+                <div class="field"><label>Стойки</label><input id="checkInDesks"></div>
+                <div class="field"><label>Выход</label><input id="gate"></div>
                 <div class="field"><label>Дата</label><input type="date" id="flightDate" required></div>
             </div>
             <button type="submit" class="btn btn-save" id="submitBtn">➕ Добавить рейс</button>
@@ -99,33 +63,53 @@
 
     <div class="card">
         <h2>📋 Все рейсы</h2>
-        <button class="copy-btn" onclick="copyToTablo()">📋 Скопировать данные для табло</button>
-        <div id="flightsList" style="margin-top:20px;">Загрузка...</div>
+        <div id="flightsList">Загрузка...</div>
     </div>
 
     <script>
-        const STORAGE_KEY = 'uvs_flights';
+        // ⚠️ ЗАМЕНИ НА СВОЙ URL СКРИПТА
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyJAtPwQ54AtCG-5A6PjPHZDBmwx1aAoEy2KKPsq6cfaj2Vdvky5_-Prq27D8aVgvzIjg/exec';
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQj_l4k-Qc_nhRJ2z4PKr_kvSV_giJ5pZr7dO0CC7X4tFhEX-AJ6wXiw2akrQqQ8qAJNuqAgSreCepm/pub?output=csv';
 
-        function getFlights() {
-            try {
-                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-            } catch(e) {
-                return [];
-            }
-        }
+        let flights = [];
 
-        function saveFlights(flights) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(flights));
-        }
-
-        function getDateString() {
+        function getToday() {
             const now = new Date();
-            let h = now.getUTCHours() + 4, d = now.getUTCDate(), m = now.getUTCMonth(), y = now.getUTCFullYear();
-            if (h >= 24) { d++; }
+            let d = now.getUTCDate(), m = now.getUTCMonth(), y = now.getUTCFullYear();
+            if (now.getUTCHours() + 4 >= 24) d++;
             return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
         }
 
-        function saveFlight(e) {
+        async function load() {
+            try {
+                const r = await fetch(CSV_URL);
+                const text = await r.text();
+                const rows = text.trim().split('\n').slice(1);
+                flights = rows.filter(r => r.trim()).map(row => {
+                    const cols = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || row.split(',');
+                    return {
+                        id: (cols[0]||'').replace(/"/g,''),
+                        airline: (cols[1]||'').replace(/"/g,''),
+                        flightNumber: (cols[2]||'').replace(/"/g,''),
+                        destination: (cols[3]||'').replace(/"/g,''),
+                        iata: (cols[4]||'').replace(/"/g,''),
+                        checkInStart: cols[5]||'',
+                        checkInEnd: cols[6]||'',
+                        boardingStart: cols[7]||'',
+                        boardingEnd: cols[8]||'',
+                        departureTime: cols[9]||'',
+                        date: cols[10]||'',
+                        checkInDesks: (cols[11]||'').replace(/"/g,''),
+                        gate: (cols[12]||'').replace(/"/g,'')
+                    };
+                });
+                render();
+            } catch(e) {
+                document.getElementById('flightsList').innerHTML = 'Ошибка загрузки';
+            }
+        }
+
+        async function saveFlight(e) {
             e.preventDefault();
             const editId = document.getElementById('editId').value;
             const flight = {
@@ -142,41 +126,46 @@
                 date: document.getElementById('flightDate').value,
                 checkInDesks: document.getElementById('checkInDesks').value.trim(),
                 gate: document.getElementById('gate').value.trim(),
+                action: editId ? 'update' : 'add'
             };
 
-            let flights = getFlights();
-            
-            if (editId) {
-                const idx = flights.findIndex(f => f.id === editId);
-                if (idx !== -1) flights[idx] = flight;
-            } else {
-                flights.push(flight);
+            try {
+                const r = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify(flight)
+                });
+                const d = await r.json();
+                if (d.success) {
+                    showMsg('✅ Сохранено!', 'success');
+                    cancelEdit();
+                    load();
+                } else {
+                    showMsg('❌ Ошибка', 'error');
+                }
+            } catch(err) {
+                showMsg('❌ Ошибка: ' + err.message, 'error');
             }
-
-            saveFlights(flights);
-            showMsg('✅ Сохранено!');
-            cancelEdit();
-            render();
         }
 
         function editFlight(f) {
             document.getElementById('editId').value = f.id;
-            document.getElementById('airline').value = f.airline || '';
-            document.getElementById('flightNumber').value = f.flightNumber || '';
-            document.getElementById('destination').value = f.destination || '';
-            document.getElementById('iata').value = f.iata || '';
-            document.getElementById('checkInStart').value = f.checkInStart || '';
-            document.getElementById('checkInEnd').value = f.checkInEnd || '';
-            document.getElementById('boardingStart').value = f.boardingStart || '';
-            document.getElementById('boardingEnd').value = f.boardingEnd || '';
-            document.getElementById('departureTime').value = f.departureTime || '';
-            document.getElementById('flightDate').value = f.date || '';
-            document.getElementById('checkInDesks').value = f.checkInDesks || '';
-            document.getElementById('gate').value = f.gate || '';
-            
+            document.getElementById('airline').value = f.airline;
+            document.getElementById('flightNumber').value = f.flightNumber;
+            document.getElementById('destination').value = f.destination;
+            document.getElementById('iata').value = f.iata;
+            document.getElementById('checkInStart').value = f.checkInStart;
+            document.getElementById('checkInEnd').value = f.checkInEnd;
+            document.getElementById('boardingStart').value = f.boardingStart;
+            document.getElementById('boardingEnd').value = f.boardingEnd;
+            document.getElementById('departureTime').value = f.departureTime;
+            document.getElementById('flightDate').value = f.date;
+            document.getElementById('checkInDesks').value = f.checkInDesks;
+            document.getElementById('gate').value = f.gate;
             document.getElementById('formTitle').textContent = '✏️ Редактировать';
             document.getElementById('submitBtn').textContent = '💾 Сохранить';
             document.getElementById('cancelBtn').style.display = 'inline-block';
+            window.scrollTo(0,0);
         }
 
         function cancelEdit() {
@@ -185,20 +174,25 @@
             document.getElementById('formTitle').textContent = '➕ Добавить рейс';
             document.getElementById('submitBtn').textContent = '➕ Добавить рейс';
             document.getElementById('cancelBtn').style.display = 'none';
-            document.getElementById('flightDate').value = getDateString();
+            document.getElementById('flightDate').value = getToday();
         }
 
-        function del(id) {
+        async function del(id) {
             if (!confirm('Удалить рейс?')) return;
-            let flights = getFlights();
-            flights = flights.filter(f => f.id !== id);
-            saveFlights(flights);
-            showMsg('🗑 Удалено');
-            render();
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({action:'delete', id:id})
+                });
+                showMsg('🗑 Удалено', 'success');
+                load();
+            } catch(e) {
+                showMsg('❌ Ошибка', 'error');
+            }
         }
 
         function render() {
-            const flights = getFlights();
             if (!flights.length) {
                 document.getElementById('flightsList').innerHTML = '<p style="color:#94a3b8;">Нет рейсов</p>';
                 return;
@@ -207,12 +201,7 @@
                 .sort((a,b) => (a.date+a.departureTime).localeCompare(b.date+b.departureTime))
                 .map(f => `
                     <div class="flight-item">
-                        <div class="flight-info">
-                            <span>📅 <strong>${f.date}</strong></span>
-                            <span>🕐 <strong>${f.departureTime}</strong></span>
-                            <span>✈ <strong>${f.airline} ${f.flightNumber}</strong></span>
-                            <span>📍 ${f.destination} (${f.iata})</span>
-                        </div>
+                        <div>📅 ${f.date} | 🕐 ${f.departureTime} | ✈ ${f.airline} ${f.flightNumber} | 📍 ${f.destination} (${f.iata})</div>
                         <div>
                             <button class="btn-edit" onclick="editFlight(${JSON.stringify(f).replace(/"/g,'&quot;')})">✏️</button>
                             <button class="btn-del" onclick="del('${f.id}')">🗑</button>
@@ -221,27 +210,16 @@
                 `).join('');
         }
 
-        function copyToTablo() {
-            const flights = getFlights();
-            const json = JSON.stringify(flights);
-            navigator.clipboard.writeText(json).then(() => {
-                showMsg('📋 Данные скопированы! Вставь их в табло.');
-            });
-            
-            // Показать инструкцию
-            alert('Данные скопированы!\n\n1. Открой index.html (табло)\n2. Нажми F12 → Console\n3. Вставь данные и нажми Enter\n\nКоманда:\nlocalStorage.setItem("uvs_flights", \'' + json + '\');\nlocation.reload();');
-        }
-
-        function showMsg(msg) {
+        function showMsg(msg, type) {
             const n = document.createElement('div');
-            n.className = 'msg success';
+            n.className = `msg ${type}`;
             n.textContent = msg;
             document.body.appendChild(n);
             setTimeout(() => n.remove(), 3000);
         }
 
-        document.getElementById('flightDate').value = getDateString();
-        render();
+        document.getElementById('flightDate').value = getToday();
+        load();
     </script>
 </body>
 </html>
