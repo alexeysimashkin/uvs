@@ -1,18 +1,17 @@
 const https = require('https');
 
 // ⚠️ ЗАМЕНИ НА СВОИ ДАННЫЕ
-const GIST_ID = '2f4805cecf5095658da5702839a0b8e98355bf1f'; // ID из URL гиста
-const GITHUB_TOKEN = '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'; // GitHub токен
-const GITHUB_USERNAME = 'alexeysimashkin'; // Твой GitHub username
+const GIST_ID = '4b67cecdc98cd3ef2800882a3588832d';
+const GITHUB_TOKEN = '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';
+const GITHUB_USERNAME = 'alexeysimashkin';
 
 const RAW_URL = `https://gist.githubusercontent.com/${GITHUB_USERNAME}/${GIST_ID}/raw/flights.json`;
 const API_URL = `https://api.github.com/gists/${GIST_ID}`;
 
-function request(url, options = {}) {
+function httpRequest(url, options = {}) {
     return new Promise((resolve, reject) => {
         const urlObj = new URL(url);
-        const isHttps = urlObj.protocol === 'https:';
-        const mod = isHttps ? https : require('http');
+        const mod = urlObj.protocol === 'https:' ? https : require('http');
         
         const reqOptions = {
             hostname: urlObj.hostname,
@@ -37,7 +36,9 @@ function request(url, options = {}) {
             });
         });
 
-        req.on('error', reject);
+        req.on('error', (err) => {
+            reject(err);
+        });
 
         if (options.body) {
             req.write(JSON.stringify(options.body));
@@ -47,36 +48,26 @@ function request(url, options = {}) {
 }
 
 async function readFlights() {
-    try {
-        const data = await request(RAW_URL);
-        return data.flights || [];
-    } catch(e) {
-        console.error('Read error:', e.message);
-        return [];
-    }
+    const data = await httpRequest(RAW_URL);
+    return data.flights || [];
 }
 
 async function saveFlights(flights) {
-    try {
-        await request(API_URL, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: {
-                files: {
-                    'flights.json': {
-                        content: JSON.stringify({ flights: flights }, null, 2)
-                    }
+    await httpRequest(API_URL, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `token ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json'
+        },
+        body: {
+            files: {
+                'flights.json': {
+                    content: JSON.stringify({ flights: flights })
                 }
             }
-        });
-        return true;
-    } catch(e) {
-        console.error('Save error:', e.message);
-        return false;
-    }
+        }
+    });
+    return true;
 }
 
 module.exports = async (req, res) => {
@@ -87,19 +78,17 @@ module.exports = async (req, res) => {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
+        // GET
         if (req.method === 'GET') {
             const flights = await readFlights();
             return res.status(200).json({ flights });
         }
 
+        // POST - добавить рейс
         if (req.method === 'POST') {
             const flights = await readFlights();
             const flight = req.body;
             
-            if (!flight.flightNumber || !flight.destination) {
-                return res.status(400).json({ error: 'Заполните номер рейса и направление' });
-            }
-
             flight.id = Date.now().toString();
             flight.createdAt = new Date().toISOString();
             
@@ -109,36 +98,32 @@ module.exports = async (req, res) => {
             return res.status(200).json({ success: true, flight: flight });
         }
 
+        // PUT - обновить
         if (req.method === 'PUT') {
             const flights = await readFlights();
             const updated = req.body;
             const index = flights.findIndex(f => f.id === updated.id);
             
-            if (index === -1) return res.status(404).json({ error: 'Рейс не найден' });
+            if (index === -1) return res.status(404).json({ error: 'Не найден' });
             
             flights[index] = { ...flights[index], ...updated };
-            await saveFlights(flights);
-            
-            return res.status(200).json({ success: true, flight: flights[index] });
-        }
-
-        if (req.method === 'DELETE') {
-            const flights = await readFlights();
-            const id = req.query.id;
-            const index = flights.findIndex(f => f.id === id);
-            
-            if (index === -1) return res.status(404).json({ error: 'Рейс не найден' });
-            
-            flights.splice(index, 1);
             await saveFlights(flights);
             
             return res.status(200).json({ success: true });
         }
 
-        return res.status(405).json({ error: 'Метод не поддерживается' });
+        // DELETE
+        if (req.method === 'DELETE') {
+            const flights = await readFlights();
+            const id = req.query.id;
+            const newFlights = flights.filter(f => f.id !== id);
+            
+            await saveFlights(newFlights);
+            
+            return res.status(200).json({ success: true });
+        }
 
     } catch(err) {
-        console.error('Error:', err);
-        return res.status(500).json({ error: 'Ошибка сервера: ' + err.message });
+        return res.status(500).json({ error: err.message });
     }
 };
